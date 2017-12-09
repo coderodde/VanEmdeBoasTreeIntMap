@@ -309,6 +309,7 @@ public final class VanEmdeBoasTreeIntMap<V> {
     }
     
     public int getNextIntKey(int key) {
+        checkKey(key);
         int nextKey = root.getSuccessor(key - minimumKey);
         return nextKey == NULL_KEY ?
                 this.minimumKey - 1 :
@@ -316,6 +317,7 @@ public final class VanEmdeBoasTreeIntMap<V> {
     }
     
     public int getPreviousIntKey(int key) {
+        checkKey(key);
         int previousKey = root.getPredecessor(key - minimumKey);
         return previousKey == NULL_KEY ? 
                 this.maximumKey + 1 : 
@@ -323,15 +325,18 @@ public final class VanEmdeBoasTreeIntMap<V> {
     }
     
     public boolean contains(int key) {
+        checkKey(key);
         return table[key - minimumKey] != null;
     }
     
     public V get(int key) {
+        checkKey(key);
         V value = table[key - minimumKey];
         return (value == null || value == NULL_VALUE) ? null : value;
     }
     
     public V put(int key, V value) {
+        checkKey(key);
         // Translate the key:
         key -= minimumKey;
         V currentValue = table[key];
@@ -350,6 +355,7 @@ public final class VanEmdeBoasTreeIntMap<V> {
     }
     
     public V remove(int key) {
+        checkKey(key);
         // Translate the key:
         key -= minimumKey;
         V value = table[key];
@@ -366,15 +372,13 @@ public final class VanEmdeBoasTreeIntMap<V> {
     }
     
     public void clear() {
-        if (size == 0) {
-            return;
-        }
-        
         int key = root.min;
+        int nextKey;
         
-        while (key <= root.max) {
+        for (int i = 0; i != size; ++i) {
+            nextKey = root.getSuccessor(key);
             root.treeDelete(key);
-            key = root.getSuccessor(key);
+            key = nextKey;
         }
         
         size = 0;
@@ -473,5 +477,19 @@ public final class VanEmdeBoasTreeIntMap<V> {
         return tmp == requestedUniverseSize ?
                 requestedUniverseSize :
                (tmp << 1);
+    }
+    
+    private void checkKey(int key) {
+        if (key < minimumKey) {
+            throw new IllegalArgumentException(
+                    "The given key (" + key + ") is too small. Must be at " +
+                    "least " + minimumKey + ".");
+        }
+        
+        if (key > maximumKey) {
+            throw new IllegalArgumentException(
+                    "The given key (" + key + ") is too large. Must be at " +
+                    "most " + maximumKey + ".");
+        }
     }
 }
