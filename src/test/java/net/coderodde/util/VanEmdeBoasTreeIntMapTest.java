@@ -235,16 +235,14 @@ public class VanEmdeBoasTreeIntMapTest {
     }
     
     @Test 
-    public void testTreeKeyValueIterator() {
-        KeyValueMapping<String> mapping = new KeyValueMapping<>();
+    public void testTableKeyIterator() {
         VanEmdeBoasTreeIntMap<String> tree = new VanEmdeBoasTreeIntMap<>(-4, 4);
         
         for (int i = 4; i >= -4; --i) {
-            tree.put(i, "" + i);
+            tree.put(i, null);
         }
         
-        VanEmdeBoasTreeIntMap.KeyValueIterator<String> iterator =
-                tree.get
+        VanEmdeBoasTreeIntMap.KeyIterator iterator = tree.tableKeyIterator();
         
         for (int i = -4; i <= 4; ++i) {
             assertTrue(iterator.hasNextKey());
@@ -261,6 +259,104 @@ public class VanEmdeBoasTreeIntMapTest {
         assertEquals(-2, iterator.nextKey());
         assertEquals(-1, iterator.nextKey());
         iterator.removeKey();
+        
+        assertFalse(tree.contains(-4));
+        assertTrue(tree.contains(-3));
+        assertTrue(tree.contains(-2));
+        assertFalse(tree.contains(-1));
+        
+        assertEquals(7, tree.size());
+    }
+    
+    @Test 
+    public void testTreeKeyValueIterator() {
+        KeyValueMapping<String> mapping = new KeyValueMapping<>();
+        VanEmdeBoasTreeIntMap<String> tree = new VanEmdeBoasTreeIntMap<>(-4, 4);
+        
+        for (int i = 4; i >= -4; --i) {
+            tree.put(i, "" + i);
+        }
+        
+        VanEmdeBoasTreeIntMap.KeyValueIterator<String> iterator =
+                tree.treeKeyValueIterator();
+        
+        for (int i = -4; i <= 4; ++i) {
+            assertTrue(iterator.hasNextKeyValuePair());
+            iterator.nextKeyValuePair(mapping);
+            assertEquals(i, mapping.key);
+            assertEquals("" + i, mapping.value);
+        }
+        
+        assertEquals(9, tree.size());
+        
+        iterator = tree.treeKeyValueIterator();
+        iterator.nextKeyValuePair(mapping);
+        
+        assertEquals(-4, mapping.key);
+        assertEquals("-4", mapping.value);
+        
+        iterator.removeKeyValuePair();
+        iterator.nextKeyValuePair(mapping);
+        assertEquals(-3, mapping.key);
+        assertEquals("-3", mapping.value);
+        
+        iterator.nextKeyValuePair(mapping);
+        assertEquals(-2, mapping.key);
+        assertEquals("-2", mapping.value);
+        
+        iterator.nextKeyValuePair(mapping);
+        assertEquals(-1, mapping.key);
+        assertEquals("-1", mapping.value);
+        iterator.removeKeyValuePair();
+        
+        assertFalse(tree.contains(-4));
+        assertTrue(tree.contains(-3));
+        assertTrue(tree.contains(-2));
+        assertFalse(tree.contains(-1));
+        
+        assertEquals(7, tree.size());
+    }
+    
+    @Test 
+    public void testTableKeyValueIterator() {
+        KeyValueMapping<String> mapping = new KeyValueMapping<>();
+        VanEmdeBoasTreeIntMap<String> tree = new VanEmdeBoasTreeIntMap<>(-4, 4);
+        
+        for (int i = 4; i >= -4; --i) {
+            tree.put(i, "" + i);
+        }
+        
+        VanEmdeBoasTreeIntMap.KeyValueIterator<String> iterator =
+                tree.tableKeyValueIterator();
+        
+        for (int i = -4; i <= 4; ++i) {
+            assertTrue(iterator.hasNextKeyValuePair());
+            iterator.nextKeyValuePair(mapping);
+            assertEquals(i, mapping.key);
+            assertEquals("" + i, mapping.value);
+        }
+        
+        assertEquals(9, tree.size());
+        
+        iterator = tree.treeKeyValueIterator();
+        iterator.nextKeyValuePair(mapping);
+        
+        assertEquals(-4, mapping.key);
+        assertEquals("-4", mapping.value);
+        
+        iterator.removeKeyValuePair();
+        iterator.nextKeyValuePair(mapping);
+        assertEquals(-3, mapping.key);
+        assertEquals("-3", mapping.value);
+        
+        iterator.nextKeyValuePair(mapping);
+        assertEquals(-2, mapping.key);
+        assertEquals("-2", mapping.value);
+        
+        iterator.nextKeyValuePair(mapping);
+        assertEquals(-1, mapping.key);
+        assertEquals("-1", mapping.value);
+        iterator.removeKeyValuePair();
         
         assertFalse(tree.contains(-4));
         assertTrue(tree.contains(-3));

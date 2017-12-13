@@ -557,7 +557,7 @@ public final class VanEmdeBoasTreeIntMap<V> {
                         currentIndex++) {}
                 
                 iterated++;
-                return currentIndex - minimumKey;
+                return currentIndex + minimumKey;
             }
         }
 
@@ -672,7 +672,7 @@ public final class VanEmdeBoasTreeIntMap<V> {
                 
                 iterated++;
                 V value = table[currentIndex];
-                keyValueMapping.key = currentIndex - minimumKey;
+                keyValueMapping.key = currentIndex + minimumKey;
                 keyValueMapping.value = value == NULL_VALUE ?
                                         null :
                                         value;
@@ -694,7 +694,11 @@ public final class VanEmdeBoasTreeIntMap<V> {
     }
     
     public float getTableDensityFactor() {
-        int rangeLength = getMaximumKey() - getMinimumKey();
+        if (size == 0) {
+            return 0.0f;
+        }
+        
+        int rangeLength = getMaximumKey() - getMinimumKey() + 1;
         return (1.0f * size) / rangeLength;
     }
     
