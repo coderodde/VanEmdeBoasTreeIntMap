@@ -1,6 +1,7 @@
 package net.coderodde.util;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 /**
  * This class implements a sorted map mapping integer keys to values of 
@@ -377,7 +378,8 @@ public final class VanEmdeBoasTreeIntMap<V> {
         
         for (int i = 0; i != size; ++i) {
             nextKey = root.getSuccessor(key);
-            root.treeDelete(key);
+            root.treeDelete(key); // Remove key.
+            table[key] = null;    // Remove value.
             key = nextKey;
         }
         
@@ -386,8 +388,6 @@ public final class VanEmdeBoasTreeIntMap<V> {
     
     /**
      * This inner interface specifies the API for key iterators.
-     * 
-     * @param <V> the value type.
      */
     public interface KeyIterator {
         
@@ -409,6 +409,63 @@ public final class VanEmdeBoasTreeIntMap<V> {
          * Removes the entire key/value pair of the current key.
          */
         public void removeKey();
+    }
+    
+    /**
+     * Holds a mapping while iterating the data structure.
+     * 
+     * @param <V> the value type.
+     */
+    public static final class KeyValueMapping<V> {
+        
+        public int key;
+        public V value;
+        
+        @Override
+        public boolean equals(Object o) {
+            if (o == this) {
+                return true;
+            }
+            
+            if (o == null) {
+                return false;
+            }
+            
+            if (!getClass().equals(o.getClass())) {
+                return false;
+            }
+            
+            KeyValueMapping<V> other = (KeyValueMapping<V>) o;
+            return key == other.key && Objects.equals(value, other.value);
+        }
+    }
+    
+    /**
+     * This inner interface specifies the API for the key/value iterators.
+     * 
+     * @param <V> the value type.
+     */
+    public interface KeyValueIterator<V> {
+        
+        /**
+         * Returns {@code true} only if there is more key/value pairs to 
+         * iterate.
+         * 
+         * @return {@code true} if there is more pairs to iterate.
+         */
+        public boolean hasNextKeyValuePair();
+        
+        /**
+         * Loads the current key/value pair.
+         * 
+         * @param keyValueMapping the key/value pair where to store the data.
+         */
+        public void nextKeyValuePair(KeyValueMapping<V> keyValueMapping);
+        
+        /**
+         * Removes the previously iterated key/value pair.
+         */
+        public void removeKeyValuePair();
     }
     
     /**
@@ -518,6 +575,124 @@ public final class VanEmdeBoasTreeIntMap<V> {
         }
     }
     
+    /**
+     * Implements the key iterator that traverses the integers in order via the
+     * underlying van Emde Boas tree.
+     */
+    public final class TreeKeyValueIterator implements KeyValueIterator<V> {
+        
+        private int iterated;
+        private int lastReturned;
+        
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public boolean hasNextKeyValuePair() {
+            return iterated < size;
+        }
+        
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public void nextKeyValuePair(KeyValueMapping<V> keyValueMapping) {
+            if (!hasNextKeyValuePair()) {
+                throw new NoSuchElementException("Nothing to iterate left.");
+            }
+            
+            if (iterated == 0) {
+                lastReturned = getMinimumKey();
+                iterated++;
+                V value = table[lastReturned - minimumKey];
+                keyValueMapping.key = lastReturned;
+                keyValueMapping.value = value == NULL_VALUE ? null : value;
+            } else {
+                lastReturned = getNextIntKey(lastReturned);
+                iterated++;
+                V value = table[lastReturned - minimumKey];
+                keyValueMapping.key = lastReturned;
+                keyValueMapping.value = value == NULL_VALUE ? null : value;
+            }
+        }
+        
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public void removeKeyValuePair() {
+            if (iterated == 0) {
+                throw new IllegalStateException(
+                        "No current key to remove yet.");
+            }
+            
+            remove(lastReturned);
+        }
+    }
+    
+    /**
+     * Implements a key iterator that traverses directly the mapping table. This
+     * may provide a speed up over the {@link TreeKeyIterator} if the table is 
+     * densely populated.
+     */
+    public final class TableKeyValueIterator implements KeyValueIterator<V> {
+
+        private int iterated;
+        private int currentIndex;
+        
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public boolean hasNextKeyValuePair() {
+            return iterated < size;
+        }
+
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public void nextKeyValuePair(KeyValueMapping<V> keyValueMapping) {
+            if (!hasNextKeyValuePair()) {
+                throw new NoSuchElementException("Nothing to iterate left.");
+            }
+            
+            if (iterated == 0) {
+                currentIndex = getMinimumKey() - minimumKey;
+                V value = table[currentIndex];
+                iterated++;
+                keyValueMapping.key = getMinimumKey();
+                keyValueMapping.value = value == NULL_VALUE ?
+                                        null :
+                                        value;
+            } else {
+                for (currentIndex++; 
+                        table[currentIndex] == null; 
+                        currentIndex++) {}
+                
+                iterated++;
+                V value = table[currentIndex];
+                keyValueMapping.key = currentIndex - minimumKey;
+                keyValueMapping.value = value == NULL_VALUE ?
+                                        null :
+                                        value;
+            }
+        }
+
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public void removeKeyValuePair() {
+            if (iterated == 0) {
+                throw new IllegalStateException(
+                        "No current key to remove yet.");
+            }
+            
+            remove(currentIndex + minimumKey);
+        }
+    }
+    
     public float getTableDensityFactor() {
         int rangeLength = getMaximumKey() - getMinimumKey();
         return (1.0f * size) / rangeLength;
@@ -529,6 +704,14 @@ public final class VanEmdeBoasTreeIntMap<V> {
     
     public KeyIterator tableKeyIterator() {
         return new TableKeyIterator();
+    }
+    
+    public KeyValueIterator<V> treeKeyValueIterator() {
+        return new TreeKeyValueIterator();
+    }
+    
+    public KeyValueIterator<V> tableKeyValueIterator() {
+        return new TableKeyValueIterator();
     }
     
     public static final class Mapping<V> {

@@ -1,5 +1,6 @@
 package net.coderodde.util;
 
+import net.coderodde.util.VanEmdeBoasTreeIntMap.KeyValueMapping;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -208,6 +209,42 @@ public class VanEmdeBoasTreeIntMapTest {
         }
         
         VanEmdeBoasTreeIntMap.KeyIterator iterator = tree.treeKeyIterator();
+        
+        for (int i = -4; i <= 4; ++i) {
+            assertTrue(iterator.hasNextKey());
+            assertEquals(i, iterator.nextKey());
+        }
+        
+        assertEquals(9, tree.size());
+        
+        iterator = tree.treeKeyIterator();
+        
+        assertEquals(-4, iterator.nextKey());
+        iterator.removeKey();
+        assertEquals(-3, iterator.nextKey());
+        assertEquals(-2, iterator.nextKey());
+        assertEquals(-1, iterator.nextKey());
+        iterator.removeKey();
+        
+        assertFalse(tree.contains(-4));
+        assertTrue(tree.contains(-3));
+        assertTrue(tree.contains(-2));
+        assertFalse(tree.contains(-1));
+        
+        assertEquals(7, tree.size());
+    }
+    
+    @Test 
+    public void testTreeKeyValueIterator() {
+        KeyValueMapping<String> mapping = new KeyValueMapping<>();
+        VanEmdeBoasTreeIntMap<String> tree = new VanEmdeBoasTreeIntMap<>(-4, 4);
+        
+        for (int i = 4; i >= -4; --i) {
+            tree.put(i, "" + i);
+        }
+        
+        VanEmdeBoasTreeIntMap.KeyValueIterator<String> iterator =
+                tree.get
         
         for (int i = -4; i <= 4; ++i) {
             assertTrue(iterator.hasNextKey());
