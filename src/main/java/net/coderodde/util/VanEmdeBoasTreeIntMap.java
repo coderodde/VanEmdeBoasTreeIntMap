@@ -344,7 +344,7 @@ public final class VanEmdeBoasTreeIntMap<V> {
         if (currentValue != null) {
             // key is present in this map.
             V oldValue = table[key];
-            table[key] = value;
+            table[key] = value == null ? NULL_VALUE : value;
             return oldValue;
         } else {
             root.treeInsert(key);
@@ -384,40 +384,151 @@ public final class VanEmdeBoasTreeIntMap<V> {
         size = 0;
     }
     
-    public static final class IntKeyIterator<V> {
+    /**
+     * This inner interface specifies the API for key iterators.
+     * 
+     * @param <V> the value type.
+     */
+    public interface KeyIterator {
         
-        private final VanEmdeBoasTreeIntMap<V> tree;
-        private int iterated = 0;
+        /**
+         * Returns {@code true} only if there is more keys to iterate.
+         * 
+         * @return {@code true} if there is more keys to iterate.
+         */
+        public boolean hasNextKey();
+        
+        /**
+         * Returns the next key in the sorted iteration order.
+         * 
+         * @return the next key.
+         */
+        public int nextKey();
+        
+        /**
+         * Removes the entire key/value pair of the current key.
+         */
+        public void removeKey();
+    }
+    
+    /**
+     * Implements the key iterator that traverses the integers in order via the
+     * underlying van Emde Boas tree.
+     */
+    public final class TreeKeyIterator implements KeyIterator {
+        
+        private int iterated;
         private int lastReturned;
         
-        IntKeyIterator(VanEmdeBoasTreeIntMap<V> tree) {
-            this.tree = tree;
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public boolean hasNextKey() {
+            return iterated < size;
         }
         
-        public boolean hasNext() {
-            return iterated < tree.size;
-        }
-        
-        public int next() {
-            if (!hasNext()) {
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public int nextKey() {
+            if (!hasNextKey()) {
                 throw new NoSuchElementException("Nothing to iterate left.");
             }
             
             if (iterated == 0) {
-                lastReturned = tree.getMinimumKey();
+                lastReturned = getMinimumKey();
                 iterated++;
                 return lastReturned;
             } else {
-                int next = tree.getNextIntKey(lastReturned);
+                int next = getNextIntKey(lastReturned);
                 lastReturned = next;
                 iterated++;
                 return next;
             }
         }
+        
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public void removeKey() {
+            if (iterated == 0) {
+                throw new IllegalStateException(
+                        "No current key to remove yet.");
+            }
+            
+            remove(lastReturned);
+        }
     }
     
-    public IntKeyIterator<V> keyIterator() {
-        return new IntKeyIterator<>(this);
+    /**
+     * Implements a key iterator that traverses directly the mapping table. This
+     * may provide a speed up over the {@link TreeKeyIterator} if the table is 
+     * densely populated.
+     */
+    public final class TableKeyIterator implements KeyIterator {
+
+        private int iterated;
+        private int currentIndex;
+        
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public boolean hasNextKey() {
+            return iterated < size;
+        }
+
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public int nextKey() {
+            if (!hasNextKey()) {
+                throw new NoSuchElementException("Nothing to iterate left.");
+            }
+            
+            if (iterated == 0) {
+                currentIndex = getMinimumKey() - minimumKey;
+                iterated++;
+                return getMinimumKey();
+            } else {
+                for (currentIndex++; 
+                        table[currentIndex] == null; 
+                        currentIndex++) {}
+                
+                iterated++;
+                return currentIndex - minimumKey;
+            }
+        }
+
+        /**
+         * {@inheritDoc }
+         */
+        @Override
+        public void removeKey() {
+            if (iterated == 0) {
+                throw new IllegalStateException(
+                        "No current key to remove yet.");
+            }
+            
+            remove(currentIndex + minimumKey);
+        }
+    }
+    
+    public float getTableDensityFactor() {
+        int rangeLength = getMaximumKey() - getMinimumKey();
+        return (1.0f * size) / rangeLength;
+    }
+    
+    public KeyIterator treeKeyIterator() {
+        return new TreeKeyIterator();
+    }
+    
+    public KeyIterator tableKeyIterator() {
+        return new TableKeyIterator();
     }
     
     public static final class Mapping<V> {
@@ -462,6 +573,10 @@ public final class VanEmdeBoasTreeIntMap<V> {
                 mapping.value = tree.table[lastReturned - tree.minimumKey];
             }
         }
+    }
+    
+    public MappingIterator<V> mappingIterator() {
+        return new MappingIterator<>(this);
     }
     
     private void checkBounds(int minimumKey, int maximumKey) {

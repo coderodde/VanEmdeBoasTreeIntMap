@@ -166,21 +166,113 @@ public class VanEmdeBoasTreeIntMapTest {
 
     @Test
     public void testPut() {
+        VanEmdeBoasTreeIntMap<Integer> tree = 
+                new VanEmdeBoasTreeIntMap<>(-5, 10);
         
+        for (int i = -2; i <= 4; ++i) {
+            assertFalse(tree.contains(i));
+            assertNull(tree.put(i, 2 * i));
+            assertTrue(tree.contains(i));
+        }
+        
+        for (int i = -3; i >= -5; --i) {
+            assertFalse(tree.contains(i));
+            assertNull(tree.get(i));
+        }
+        
+        assertTrue(tree.contains(0));
+        tree.remove(0);
+        assertFalse(tree.contains(0));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testLowerBound() {
+        VanEmdeBoasTreeIntMap<String> tree = new VanEmdeBoasTreeIntMap<>(-4, 4);
+        
+        tree.put(-5, "-5");
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void testUpperBound() {
+        VanEmdeBoasTreeIntMap<String> tree = new VanEmdeBoasTreeIntMap<>(-4, 4);
+        
+        tree.put(5, "5");
+    }
+    
+    @Test 
+    public void testTreeKeyIterator() {
+        VanEmdeBoasTreeIntMap<String> tree = new VanEmdeBoasTreeIntMap<>(-4, 4);
+        
+        for (int i = 4; i >= -4; --i) {
+            tree.put(i, null);
+        }
+        
+        VanEmdeBoasTreeIntMap.KeyIterator iterator = tree.treeKeyIterator();
+        
+        for (int i = -4; i <= 4; ++i) {
+            assertTrue(iterator.hasNextKey());
+            assertEquals(i, iterator.nextKey());
+        }
+        
+        assertEquals(9, tree.size());
+        
+        iterator = tree.treeKeyIterator();
+        
+        assertEquals(-4, iterator.nextKey());
+        iterator.removeKey();
+        assertEquals(-3, iterator.nextKey());
+        assertEquals(-2, iterator.nextKey());
+        assertEquals(-1, iterator.nextKey());
+        iterator.removeKey();
+        
+        assertFalse(tree.contains(-4));
+        assertTrue(tree.contains(-3));
+        assertTrue(tree.contains(-2));
+        assertFalse(tree.contains(-1));
+        
+        assertEquals(7, tree.size());
     }
 
     @Test
     public void testRemove() {
+        VanEmdeBoasTreeIntMap<Integer> tree = new VanEmdeBoasTreeIntMap<>(1, 5);
         
+        tree.put(3, 3);
+        tree.put(1, 1);
+        tree.put(5, 5);
+        
+        assertTrue(tree.contains(1));
+        assertTrue(tree.contains(3));
+        assertTrue(tree.contains(5));
+        
+        tree.put(1, null);
+        
+        assertTrue(tree.contains(1));
+        
+        tree.remove(1);
+        
+        assertFalse(tree.contains(1));
     }
 
     @Test
-    public void testKeyIterator() {
-        
-    }
-    
-    @Test
     public void clear() {
+        VanEmdeBoasTreeIntMap<Integer> tree =
+                new VanEmdeBoasTreeIntMap<>(3, 10);
         
+        for (int i = 4, sz = 0; i <= 8; ++i, ++sz) {
+            assertEquals(sz, tree.size());
+            tree.put(i, null);
+            assertEquals(sz + 1, tree.size());
+        }
+        
+        assertEquals(5, tree.size());
+        tree.clear();
+        assertEquals(0, tree.size());
+        
+        for (int i = 3; i <= 10; ++i) {
+            assertFalse(tree.contains(i));
+            assertNull(tree.get(i));
+            assertNull(tree.remove(i));
+        }
     }
 }
