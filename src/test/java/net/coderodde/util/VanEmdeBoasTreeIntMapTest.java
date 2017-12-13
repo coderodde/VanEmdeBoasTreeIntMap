@@ -143,12 +143,12 @@ public class VanEmdeBoasTreeIntMapTest {
         tree.put(-3, -3);
         tree.put(-1, -1);
         
-        assertTrue(tree.contains(-5));
-        assertTrue(tree.contains(-3));
-        assertTrue(tree.contains(-1));
+        assertTrue(tree.containsKey(-5));
+        assertTrue(tree.containsKey(-3));
+        assertTrue(tree.containsKey(-1));
         
-        assertFalse(tree.contains(-4));
-        assertFalse(tree.contains(-2));
+        assertFalse(tree.containsKey(-4));
+        assertFalse(tree.containsKey(-2));
     }
 
     @Test
@@ -171,19 +171,19 @@ public class VanEmdeBoasTreeIntMapTest {
                 new VanEmdeBoasTreeIntMap<>(-5, 10);
         
         for (int i = -2; i <= 4; ++i) {
-            assertFalse(tree.contains(i));
+            assertFalse(tree.containsKey(i));
             assertNull(tree.put(i, 2 * i));
-            assertTrue(tree.contains(i));
+            assertTrue(tree.containsKey(i));
         }
         
         for (int i = -3; i >= -5; --i) {
-            assertFalse(tree.contains(i));
+            assertFalse(tree.containsKey(i));
             assertNull(tree.get(i));
         }
         
-        assertTrue(tree.contains(0));
+        assertTrue(tree.containsKey(0));
         tree.remove(0);
-        assertFalse(tree.contains(0));
+        assertFalse(tree.containsKey(0));
     }
     
     @Test(expected = IllegalArgumentException.class)
@@ -226,10 +226,10 @@ public class VanEmdeBoasTreeIntMapTest {
         assertEquals(-1, iterator.nextKey());
         iterator.removeKey();
         
-        assertFalse(tree.contains(-4));
-        assertTrue(tree.contains(-3));
-        assertTrue(tree.contains(-2));
-        assertFalse(tree.contains(-1));
+        assertFalse(tree.containsKey(-4));
+        assertTrue(tree.containsKey(-3));
+        assertTrue(tree.containsKey(-2));
+        assertFalse(tree.containsKey(-1));
         
         assertEquals(7, tree.size());
     }
@@ -260,10 +260,10 @@ public class VanEmdeBoasTreeIntMapTest {
         assertEquals(-1, iterator.nextKey());
         iterator.removeKey();
         
-        assertFalse(tree.contains(-4));
-        assertTrue(tree.contains(-3));
-        assertTrue(tree.contains(-2));
-        assertFalse(tree.contains(-1));
+        assertFalse(tree.containsKey(-4));
+        assertTrue(tree.containsKey(-3));
+        assertTrue(tree.containsKey(-2));
+        assertFalse(tree.containsKey(-1));
         
         assertEquals(7, tree.size());
     }
@@ -309,10 +309,10 @@ public class VanEmdeBoasTreeIntMapTest {
         assertEquals("-1", mapping.value);
         iterator.removeKeyValuePair();
         
-        assertFalse(tree.contains(-4));
-        assertTrue(tree.contains(-3));
-        assertTrue(tree.contains(-2));
-        assertFalse(tree.contains(-1));
+        assertFalse(tree.containsKey(-4));
+        assertTrue(tree.containsKey(-3));
+        assertTrue(tree.containsKey(-2));
+        assertFalse(tree.containsKey(-1));
         
         assertEquals(7, tree.size());
     }
@@ -358,10 +358,10 @@ public class VanEmdeBoasTreeIntMapTest {
         assertEquals("-1", mapping.value);
         iterator.removeKeyValuePair();
         
-        assertFalse(tree.contains(-4));
-        assertTrue(tree.contains(-3));
-        assertTrue(tree.contains(-2));
-        assertFalse(tree.contains(-1));
+        assertFalse(tree.containsKey(-4));
+        assertTrue(tree.containsKey(-3));
+        assertTrue(tree.containsKey(-2));
+        assertFalse(tree.containsKey(-1));
         
         assertEquals(7, tree.size());
     }
@@ -374,17 +374,17 @@ public class VanEmdeBoasTreeIntMapTest {
         tree.put(1, 1);
         tree.put(5, 5);
         
-        assertTrue(tree.contains(1));
-        assertTrue(tree.contains(3));
-        assertTrue(tree.contains(5));
+        assertTrue(tree.containsKey(1));
+        assertTrue(tree.containsKey(3));
+        assertTrue(tree.containsKey(5));
         
         tree.put(1, null);
         
-        assertTrue(tree.contains(1));
+        assertTrue(tree.containsKey(1));
         
         tree.remove(1);
         
-        assertFalse(tree.contains(1));
+        assertFalse(tree.containsKey(1));
     }
 
     @Test
@@ -403,7 +403,7 @@ public class VanEmdeBoasTreeIntMapTest {
         assertEquals(0, tree.size());
         
         for (int i = 3; i <= 10; ++i) {
-            assertFalse(tree.contains(i));
+            assertFalse(tree.containsKey(i));
             assertNull(tree.get(i));
             assertNull(tree.remove(i));
         }

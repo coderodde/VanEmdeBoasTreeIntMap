@@ -56,7 +56,107 @@ public final class Benchmark {
     }
     
     private static void benchmarkVebMap(Integer[] testArray) {
+        System.out.println(
+                
+                "--- " + VanEmdeBoasTreeIntMap.class.getSimpleName() + " ---");
         
+        long startTime;
+        long endTime;
+        long totalTime = 0L;
+        
+        startTime = System.currentTimeMillis();
+        // Create.
+        VanEmdeBoasTreeIntMap<Integer> map = 
+                new VanEmdeBoasTreeIntMap<>(MINIMUM_KEY, MAXIMUM_KEY);
+        
+        endTime = System.currentTimeMillis();
+        totalTime += endTime - startTime;
+        
+        System.out.println("Constructed a van Emde Boas tree in " +
+                (endTime - startTime) + " milliseconds.");
+        
+        // put().
+        startTime = System.currentTimeMillis();
+        
+        for (Integer i : testArray) {
+            map.put(i, i);
+        }
+        
+        endTime = System.currentTimeMillis();
+        totalTime += endTime - startTime;
+        
+        System.out.println(
+                "put() in " + (endTime - startTime) + " milliseconds.");
+        
+        // Key iteration.
+        startTime = System.currentTimeMillis();
+        KeyIterator keyIterator = map.tableKeyIterator();
+        
+        while (keyIterator.hasNextKey()) {
+            keyIterator.nextKey();
+        }
+        
+        endTime = System.currentTimeMillis();
+        totalTime += endTime - startTime;
+        
+        System.out.println(
+                "Key iteration in " + (endTime - startTime) + " milliseconds.");
+        
+        // Entry set iteration.
+        startTime = System.currentTimeMillis();
+        KeyValueMapping<Integer> mapping = new KeyValueMapping<>();
+        KeyValueIterator<Integer> keyValueIterator = map.tableKeyValueIterator();
+        
+        while (keyValueIterator.hasNextKeyValuePair()) {
+            keyValueIterator.nextKeyValuePair(mapping);
+        }
+        
+        endTime = System.currentTimeMillis();
+        totalTime += endTime - startTime;
+        
+        System.out.println(
+                "Key/value iteration in " + (endTime - startTime) +
+                " milliseconds.");
+        
+        // get().
+        startTime = System.currentTimeMillis();
+        
+        for (Integer i : testArray) {
+            map.get(i);
+        }
+        
+        endTime = System.currentTimeMillis();
+        totalTime += endTime - startTime;
+        
+        System.out.println(
+                "get() in " + (endTime - startTime) + " milliseconds.");
+        
+        // containsKey().
+        startTime = System.currentTimeMillis();
+        
+        for (Integer i : testArray) {
+            map.containsKey(i);
+        }
+        
+        endTime = System.currentTimeMillis();
+        totalTime += endTime - startTime;
+        
+        System.out.println(
+                "contains() in " + (endTime - startTime) + " milliseconds.");
+        
+        // remove().
+        startTime = System.currentTimeMillis();
+        
+        for (Integer i : testArray) {
+            map.remove(i);
+        }
+        
+        endTime = System.currentTimeMillis();
+        totalTime += endTime - startTime;
+        
+        System.out.println(
+                "remove() in " + (endTime - startTime) + " milliseconds.");
+        System.out.println("Total time: " + totalTime + " milliseconds.");
     }
     
     private static void benchmarkMap(Map<Integer, Integer> map,
@@ -108,7 +208,20 @@ public final class Benchmark {
                 "entrySet().iterator() in " + (endTime - startTime) + 
                 " milliseconds.");
         
-        // containsKey.
+        // get().
+        startTime = System.currentTimeMillis();
+        
+        for (Integer i : testArray) {
+            map.get(i);
+        }
+        
+        endTime = System.currentTimeMillis();
+        totalTime += endTime - startTime;
+        
+        System.out.println(
+                "get() in " + (endTime - startTime) + " milliseconds.");
+        
+        // containsKey().
         startTime = System.currentTimeMillis();
         
         for (int i = MINIMUM_KEY; i <= MAXIMUM_KEY; ++i) {
@@ -121,6 +234,7 @@ public final class Benchmark {
         System.out.println(
                 "containsKey() in " + (endTime - startTime) + " milliseconds.");
         
+        // remove().
         startTime = System.currentTimeMillis();
         
         for (Integer i : testArray) {
@@ -155,7 +269,7 @@ public final class Benchmark {
         }
         
         for (Integer i : randomIntegerArray) {
-            vebMap.contains(i);
+            vebMap.containsKey(i);
             treeMap.containsKey(i);
             hashMap.containsKey(i);
         }

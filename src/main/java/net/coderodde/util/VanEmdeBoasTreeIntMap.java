@@ -325,7 +325,7 @@ public final class VanEmdeBoasTreeIntMap<V> {
                 previousKey + minimumKey;
     }
     
-    public boolean contains(int key) {
+    public boolean containsKey(int key) {
         checkKey(key);
         return table[key - minimumKey] != null;
     }
